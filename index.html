@@ -1,0 +1,597 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="theme-color" content="#090d1f" />
+  <title>星轨消消乐 · 基础框架</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #080b1a;
+      --panel: rgba(17, 22, 48, .78);
+      --panel-strong: rgba(25, 31, 65, .92);
+      --line: rgba(170, 183, 255, .18);
+      --text: #f5f6ff;
+      --muted: #9ca5ca;
+      --violet: #9a8cff;
+      --cyan: #6ee7f4;
+      --pink: #ef9dcc;
+      --gold: #ffd88a;
+      --shadow: 0 24px 80px rgba(0, 0, 0, .35);
+      font-family: "Inter", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-width: 320px;
+      min-height: 100vh;
+      color: var(--text);
+      background: var(--bg);
+      overflow-x: hidden;
+      -webkit-touch-callout: none;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+
+    .space {
+      position: relative;
+      min-height: 100vh;
+      isolation: isolate;
+      overflow: hidden;
+      background:
+        radial-gradient(circle at 14% 18%, rgba(116, 91, 220, .2), transparent 30%),
+        radial-gradient(circle at 86% 12%, rgba(48, 183, 220, .13), transparent 28%),
+        radial-gradient(circle at 48% 100%, rgba(104, 52, 153, .2), transparent 40%),
+        linear-gradient(160deg, #0a0e23 0%, #070a16 58%, #100b25 100%);
+    }
+
+    #starfield {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      opacity: .82;
+      pointer-events: none;
+    }
+
+    .aurora {
+      position: absolute;
+      width: min(54vw, 720px);
+      height: min(54vw, 720px);
+      top: -26%;
+      right: -11%;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(130, 107, 255, .17), transparent 68%);
+      filter: blur(10px);
+      z-index: -1;
+      animation: breathe 9s ease-in-out infinite alternate;
+    }
+
+    .shell {
+      width: calc(100% - 36px);
+      max-width: 1180px;
+      width: min(1180px, calc(100% - 36px));
+      margin: 0 auto;
+      padding: 28px 0 38px;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      margin-bottom: 22px;
+    }
+
+    .brand { display: flex; align-items: center; gap: 13px; }
+    .brand-mark {
+      display: grid;
+      place-items: center;
+      width: 44px;
+      height: 44px;
+      border: 1px solid rgba(255,255,255,.24);
+      border-radius: 14px;
+      background: linear-gradient(145deg, rgba(154, 140, 255, .28), rgba(110, 231, 244, .08));
+      box-shadow: inset 0 0 18px rgba(170, 164, 255, .16), 0 8px 24px rgba(69, 52, 152, .22);
+      font-size: 21px;
+    }
+    .brand strong { display: block; font-size: 15px; letter-spacing: .12em; }
+    .brand small { display: block; margin-top: 3px; color: var(--muted); font-size: 11px; letter-spacing: .08em; }
+
+    .status-pill {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: #c7cced;
+      font-size: 12px;
+    }
+    .status-dot { width: 7px; height: 7px; border-radius: 99px; background: #7df1c0; box-shadow: 0 0 14px #7df1c0; }
+
+    .hero {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 20px;
+      margin-bottom: 18px;
+    }
+    .eyebrow { margin: 0 0 9px; color: var(--cyan); font-size: 12px; letter-spacing: .2em; text-transform: uppercase; }
+    h1 { margin: 0; font-family: Georgia, "Songti SC", serif; font-size: 34px; font-size: clamp(34px, 5vw, 58px); font-weight: 500; letter-spacing: .06em; line-height: 1; }
+    .subtitle { margin: 13px 0 0; color: var(--muted); font-size: 14px; }
+
+    .hero-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 10px; }
+    button {
+      border: 0;
+      color: var(--text);
+      font: inherit;
+      cursor: pointer;
+      transition: transform .2s ease, border-color .2s ease, background .2s ease;
+    }
+    button:hover { transform: translateY(-2px); }
+    .btn {
+      padding: 11px 17px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: rgba(255,255,255,.06);
+      font-size: 13px;
+    }
+    .btn.primary {
+      border-color: rgba(167, 153, 255, .72);
+      background: linear-gradient(135deg, #8b7bfa, #6152cb);
+      box-shadow: 0 9px 22px rgba(101, 79, 223, .29);
+      font-weight: 650;
+    }
+    .btn.ghost { color: #c4c8e7; }
+
+    .layout { display: grid; grid-template-columns: 258px minmax(0, 1fr); gap: 18px; align-items: start; }
+    .side, .play-panel {
+      border: 1px solid var(--line);
+      background: var(--panel);
+      backdrop-filter: blur(18px);
+      box-shadow: var(--shadow);
+    }
+    .side { border-radius: 20px; padding: 18px; }
+    .play-panel { border-radius: 24px; padding: 18px; }
+    .section-title { display: flex; justify-content: space-between; align-items: center; margin: 0 0 13px; color: #d8dbf3; font-size: 12px; letter-spacing: .12em; }
+    .section-title span { color: #7780a6; font-size: 11px; letter-spacing: .04em; }
+
+    .stats { display: grid; gap: 9px; margin-bottom: 20px; }
+    .stat { display: flex; align-items: center; justify-content: space-between; padding: 12px 13px; border: 1px solid rgba(181, 188, 255, .11); border-radius: 13px; background: rgba(255,255,255,.035); }
+    .stat .label { color: var(--muted); font-size: 12px; }
+    .stat .value { color: #fff; font-variant-numeric: tabular-nums; font-size: 20px; font-weight: 650; }
+    .stat .value.gold { color: var(--gold); }
+    .stat .value.cyan { color: var(--cyan); }
+    .stat .value.violet { color: #c5bbff; }
+
+    .progress { height: 5px; margin: 0 0 20px; overflow: hidden; border-radius: 99px; background: rgba(255,255,255,.1); }
+    .progress i { display: block; width: 64%; height: 100%; border-radius: inherit; background: linear-gradient(90deg, var(--cyan), var(--violet)); box-shadow: 0 0 12px rgba(110, 231, 244, .55); }
+
+    .tools { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 20px; }
+    .tool { padding: 11px 5px 9px; border: 1px solid rgba(181, 188, 255, .12); border-radius: 12px; background: rgba(255,255,255,.035); text-align: center; }
+    .tool:disabled { cursor: not-allowed; opacity: .38; filter: grayscale(.5); transform: none; }
+    .tool.is-selected { border-color: rgba(110,231,244,.68); background: rgba(110,231,244,.12); box-shadow: 0 0 15px rgba(110,231,244,.2); }
+    .tool-icon { display: grid; place-items: center; width: 28px; height: 28px; margin: 0 auto 6px; border-radius: 9px; background: rgba(154, 140, 255, .14); font-size: 15px; }
+    .tool b { display: block; color: #dee0f4; font-size: 11px; font-weight: 500; }
+    .tool em { display: block; margin-top: 3px; color: #868eaf; font-size: 10px; font-style: normal; }
+
+    .chapter { padding: 13px; border: 1px solid rgba(181,188,255,.12); border-radius: 13px; background: linear-gradient(145deg, rgba(121, 105, 233, .15), rgba(255,255,255,.025)); }
+    .chapter-name { display: flex; align-items: center; gap: 8px; color: #f5e9ff; font-size: 13px; }
+    .chapter-name span { color: var(--pink); }
+    .chapter p { margin: 9px 0 0; color: var(--muted); font-size: 11px; line-height: 1.6; }
+
+    .board-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
+    .level { display: flex; align-items: center; gap: 10px; }
+    .level-badge { padding: 6px 9px; border: 1px solid rgba(110, 231, 244, .3); border-radius: 8px; background: rgba(110, 231, 244, .1); color: var(--cyan); font-size: 11px; letter-spacing: .09em; }
+    .level h2 { margin: 0; font-size: 17px; font-weight: 550; }
+    .hint { color: var(--muted); font-size: 11px; }
+
+    .game-canvas { position: relative; min-height: 490px; display: grid; place-items: center; overflow: hidden; border: 1px solid rgba(175, 188, 255, .2); border-radius: 18px; background: radial-gradient(circle at 50% 42%, rgba(90, 76, 184, .21), transparent 54%), rgba(4, 7, 20, .66); touch-action: none; }
+    .game-canvas::before { position: absolute; inset: 0; background-image: linear-gradient(rgba(168,174,255,.05) 1px, transparent 1px), linear-gradient(90deg, rgba(168,174,255,.05) 1px, transparent 1px); background-size: 54px 54px; mask-image: radial-gradient(circle at center, #000 20%, transparent 82%); content: ""; pointer-events: none; }
+    .orbit-stage { position: relative; z-index: 1; width: 88vw; max-width: 450px; height: 88vw; max-height: 450px; width: min(88vw, 450px); aspect-ratio: 1; --orbit-scale: 1; }
+    .orbit-stage::before { position: absolute; inset: 43%; border-radius: 50%; background: radial-gradient(circle, rgba(255,255,255,.95) 0 4%, rgba(157,140,255,.68) 5% 19%, transparent 20%); box-shadow: 0 0 28px rgba(149,136,255,.65); content: ""; }
+    .track { position: absolute; left: 50%; top: 50%; width: var(--diameter); height: var(--diameter); border: 1px solid rgba(182, 187, 255, .28); border-radius: 50%; transform: translate(-50%, -50%) rotate(var(--rotation, 0deg)) scale(var(--orbit-scale)); transition: filter .2s ease; pointer-events: none; }
+    .track::after { position: absolute; inset: -7px; border: 1px dashed rgba(127, 218, 239, .1); border-radius: inherit; content: ""; pointer-events: none; }
+    .track.is-dragging { filter: drop-shadow(0 0 14px rgba(110,231,244,.45)); }
+    .slot { position: absolute; left: 50%; top: 50%; width: var(--star-size); height: var(--star-size); padding: 0; border: 0; border-radius: 50%; background: transparent; transform: translate(-50%, -50%) rotate(var(--angle)) translateY(calc(var(--radius) * -1)); touch-action: none; }
+    .slot.nebula-slot { display: grid; place-items: center; cursor: not-allowed; }
+    .nebula-core { position: relative; display: block; width: 108%; height: 108%; border: 1px solid rgba(224, 190, 255, .6); border-radius: 50%; background: radial-gradient(circle at 32% 28%, rgba(255,255,255,.68) 0 7%, transparent 8%), radial-gradient(circle at 66% 66%, rgba(194,118,255,.92), rgba(67,37,120,.88) 54%, rgba(22,17,58,.95) 100%); box-shadow: 0 0 11px rgba(190,115,255,.78), inset 0 0 10px rgba(255,255,255,.2); animation: nebula-pulse 3.8s ease-in-out infinite; }
+    .nebula-core::after { position: absolute; inset: 22%; border: 1px solid rgba(247,226,255,.32); border-radius: 50%; transform: rotate(25deg) scaleX(1.5); content: ""; }
+    .blackhole-core { position: relative; display: block; width: 112%; height: 112%; border: 1px solid rgba(174, 166, 255, .5); border-radius: 50%; background: radial-gradient(circle, #02030a 0 24%, #16112f 42%, #5a3ca4 67%, transparent 70%); box-shadow: 0 0 14px rgba(111, 78, 237, .86), inset 0 0 9px #000; animation: blackhole-spin 4s linear infinite; }
+    .blackhole-core::after { position: absolute; inset: 12%; border: 1px dashed rgba(201, 184, 255, .55); border-radius: 50%; content: ""; }
+    .slot.special-blinking .star-core { animation: blink-star 1.25s ease-in-out infinite; }
+    .slot.special-moving .star-core { box-shadow: inset 3px 3px 7px rgba(255,255,255,.34), inset -4px -5px 8px rgba(0,0,0,.2), 0 0 13px var(--star-glow), 0 0 18px rgba(110,231,244,.55); }
+    .slot.special-splitting .star-core::before { position: absolute; width: 32%; height: 32%; border: 1px solid rgba(255,255,255,.78); border-radius: 50%; content: ""; transform: translate(9px, -9px); }
+    .star-core { display: grid; place-items: center; width: 100%; height: 100%; border: 1px solid rgba(255,255,255,.58); border-radius: 38% 62% 58% 42%; background: var(--star-color); box-shadow: inset 3px 3px 7px rgba(255,255,255,.34), inset -4px -5px 8px rgba(0,0,0,.2), 0 0 13px var(--star-glow); transform: rotate(45deg); transition: opacity .2s ease, transform .2s ease; }
+    .star-core::after { width: 30%; height: 30%; border-radius: 50%; background: rgba(255,255,255,.72); filter: blur(2px); content: ""; }
+    .track.is-dragging .star-core { transform: rotate(45deg) scale(1.08); }
+    .track.is-locked { border-color: rgba(255, 216, 138, .45); box-shadow: 0 0 16px rgba(255, 216, 138, .15); }
+    .track.is-locked::before { position: absolute; right: -4px; top: -10px; color: var(--gold); content: "⌑"; font-size: 14px; text-shadow: 0 0 10px rgba(255,216,138,.8); }
+    .track.is-locked .slot:not(.nebula-slot) { cursor: not-allowed; filter: saturate(.7); }
+    .track.is-bursting .star-core { animation: starburst .55s ease forwards; }
+    .star-red { --star-color: linear-gradient(145deg, #ff9cae, #bb3f68); --star-glow: rgba(255, 95, 141, .72); }
+    .star-blue { --star-color: linear-gradient(145deg, #9cdbff, #4275d3); --star-glow: rgba(86, 180, 255, .72); }
+    .star-purple { --star-color: linear-gradient(145deg, #c6aeff, #7659d3); --star-glow: rgba(161, 121, 255, .72); }
+    .star-gold { --star-color: linear-gradient(145deg, #ffe8a4, #d58d37); --star-glow: rgba(255, 204, 95, .78); }
+    .star-cyan { --star-color: linear-gradient(145deg, #9ff9ff, #2c9fb8); --star-glow: rgba(93, 236, 255, .78); }
+    .star-green { --star-color: linear-gradient(145deg, #b8f6b1, #35966a); --star-glow: rgba(126, 255, 156, .72); }
+    .orbit-label { position: absolute; left: 50%; top: 50%; color: rgba(215, 220, 255, .38); font-size: 9px; letter-spacing: .18em; transform: translate(-50%, calc(var(--label-y) * -1)); pointer-events: none; }
+    .canvas-caption { position: absolute; right: 16px; bottom: 14px; z-index: 1; color: #7780a6; font-size: 10px; letter-spacing: .08em; }
+    .score-pop { position: absolute; z-index: 5; color: var(--gold); font-size: 24px; font-weight: 700; text-shadow: 0 0 18px rgba(255,216,138,.9); pointer-events: none; animation: score-pop 1s ease forwards; }
+    .combo-pop { position: absolute; z-index: 6; left: 50%; top: 40%; color: #f4d9ff; font-size: 14px; font-weight: 700; letter-spacing: .12em; text-shadow: 0 0 16px rgba(202,153,255,.9); pointer-events: none; animation: combo-pop 1.2s cubic-bezier(.2,.8,.2,1) forwards; }
+    .dialog-layer { position: fixed; inset: 0; z-index: 20; display: grid; place-items: center; padding: 18px; background: rgba(3, 5, 17, .62); backdrop-filter: blur(10px); animation: fade-in .25s ease both; }
+    .dialog-card { width: min(420px, 100%); padding: 27px; border: 1px solid rgba(193, 183, 255, .35); border-radius: 22px; background: linear-gradient(145deg, rgba(30, 32, 75, .96), rgba(12, 14, 35, .97)); box-shadow: 0 24px 90px rgba(0,0,0,.52), 0 0 50px rgba(119, 93, 235, .18); text-align: center; animation: dialog-in .42s cubic-bezier(.2,.8,.2,1) both; }
+    .dialog-kicker { margin: 0 0 9px; color: var(--cyan); font-size: 11px; letter-spacing: .2em; }
+    .dialog-card h3 { margin: 0; font-family: Georgia, "Songti SC", serif; font-size: 30px; font-weight: 500; }
+    .dialog-card p { margin: 13px 0 20px; color: #b8bfdf; font-size: 13px; line-height: 1.7; white-space: pre-line; }
+    .dialog-actions { display: flex; justify-content: center; gap: 9px; }
+    .galaxy-overlay { position: fixed; inset: 0; z-index: 30; display: grid; place-items: center; overflow: hidden; background: radial-gradient(circle, rgba(147,125,255,.28), rgba(6,7,23,.94) 62%); animation: galaxy-in 2.4s ease both; pointer-events: none; }
+    .galaxy-overlay::before, .galaxy-overlay::after { position: absolute; width: 160vmax; height: 160vmax; border: 1px solid rgba(151, 230, 255, .34); border-radius: 50%; box-shadow: 0 0 28px rgba(133, 182, 255, .35), inset 0 0 28px rgba(188, 132, 255, .2); content: ""; animation: galaxy-ring 5s ease-out both; }
+    .galaxy-overlay::after { width: 90vmax; height: 90vmax; animation-delay: .16s; }
+    .galaxy-label { position: relative; z-index: 1; color: #fff; font-family: Georgia, "Songti SC", serif; font-size: clamp(26px, 6vw, 54px); letter-spacing: .14em; text-shadow: 0 0 28px rgba(196, 187, 255, .92); animation: galaxy-label 2.5s ease both; }
+    .canvas-caption { position: absolute; right: 16px; bottom: 14px; z-index: 1; color: #7780a6; font-size: 10px; letter-spacing: .08em; }
+
+    .panel-footer { display: flex; align-items: center; justify-content: space-between; gap: 15px; margin-top: 14px; }
+    .legend { display: flex; align-items: center; gap: 8px; color: #8e96b8; font-size: 11px; }
+    .legend i { width: 7px; height: 7px; border-radius: 50%; background: var(--violet); box-shadow: 0 0 10px var(--violet); }
+    .footer-actions { display: flex; gap: 9px; }
+
+    @keyframes breathe { from { transform: scale(.95); opacity: .5; } to { transform: scale(1.08); opacity: 1; } }
+    @keyframes starburst { 0% { opacity: 1; transform: rotate(45deg) scale(1); filter: brightness(1); } 40% { opacity: 1; transform: rotate(45deg) scale(1.7); filter: brightness(2.4); } 100% { opacity: 0; transform: rotate(45deg) scale(.1); filter: brightness(3); } }
+    @keyframes score-pop { 0% { opacity: 0; transform: translate(-50%, 5px) scale(.8); } 18% { opacity: 1; transform: translate(-50%, -4px) scale(1); } 100% { opacity: 0; transform: translate(-50%, -66px) scale(1.08); } }
+    @keyframes combo-pop { 0% { opacity: 0; transform: translate(-50%, 18px) scale(.8); } 18% { opacity: 1; transform: translate(-50%, 0) scale(1); } 100% { opacity: 0; transform: translate(-50%, -78px) scale(1.18); } }
+    @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes dialog-in { from { opacity: 0; transform: translateY(16px) scale(.95); } to { opacity: 1; transform: translateY(0) scale(1); } }
+    @keyframes galaxy-in { 0% { opacity: 0; } 18% { opacity: 1; } 76% { opacity: 1; } 100% { opacity: 0; } }
+    @keyframes galaxy-ring { from { transform: scale(.05) rotate(0deg); opacity: 0; } 24% { opacity: 1; } to { transform: scale(1) rotate(180deg); opacity: 0; } }
+    @keyframes galaxy-label { from { opacity: 0; transform: scale(.7); letter-spacing: .4em; } 24% { opacity: 1; transform: scale(1); } to { opacity: 0; transform: scale(1.12); } }
+    @keyframes nebula-pulse { 0%, 100% { transform: scale(.94); opacity: .84; } 50% { transform: scale(1.08); opacity: 1; } }
+    @keyframes blink-star { 0%, 100% { filter: brightness(.82) saturate(.9); } 50% { filter: brightness(1.9) saturate(1.5); } }
+    @keyframes blackhole-spin { to { transform: rotate(360deg); } }
+    @media (max-width: 780px) {
+      .shell { width: min(100% - 24px, 620px); padding-top: 18px; }
+      .topbar { margin-bottom: 28px; }
+      .status-pill { display: none; }
+      .hero { display: block; }
+      .hero-actions { justify-content: flex-start; margin-top: 18px; }
+      .layout { grid-template-columns: 1fr; }
+      .side { order: 2; }
+      .game-canvas { min-height: 76vw; }
+      .orbit-stage { width: min(88vw, 430px); }
+    }
+    @media (max-width: 420px) {
+      .panel-footer { align-items: flex-start; flex-direction: column; }
+      .footer-actions { width: 100%; }
+      .footer-actions .btn { flex: 1; }
+    }
+  </style>
+</head>
+<body>
+  <main class="space">
+    <canvas id="starfield" aria-hidden="true"></canvas>
+    <div class="aurora" aria-hidden="true"></div>
+    <div class="shell">
+      <header class="topbar">
+        <div class="brand">
+          <div class="brand-mark" aria-hidden="true">✦</div>
+          <div><strong>STAR RAIL</strong><small>星轨消消乐 · UI FRAMEWORK</small></div>
+        </div>
+        <div class="status-pill"><i class="status-dot"></i> 星域连接稳定</div>
+      </header>
+
+      <section class="hero" aria-labelledby="game-title">
+        <div><p class="eyebrow">A LITTLE JOURNEY THROUGH THE STARS</p><h1 id="game-title">星轨消消乐</h1><p class="subtitle">收集微光，点亮你的下一段星际旅程。</p></div>
+        <div class="hero-actions"><button class="btn ghost" type="button">重玩本关</button><button class="btn primary" type="button">开始游戏 <span aria-hidden="true">→</span></button></div>
+      </section>
+
+      <div class="layout">
+        <aside class="side" aria-label="关卡信息与道具">
+          <div class="section-title">航行数据 <span>LIVE DATA</span></div>
+          <div class="stats">
+            <div class="stat"><span class="label">当前章节</span><span class="value violet" id="chapterValue">01</span></div>
+            <div class="stat"><span class="label">关卡编号</span><span class="value" id="levelValue">01 / 60</span></div>
+            <div class="stat"><span class="label">当前分数</span><span class="value gold" id="scoreValue">0</span></div>
+            <div class="stat"><span class="label">剩余步数</span><span class="value cyan" id="movesValue">—</span></div>
+          </div>
+          <div class="section-title">星轨能量 <span>64%</span></div>
+          <div class="progress" aria-label="星轨能量 64%"><i></i></div>
+
+          <div class="section-title">辅助道具 <span>3 SLOTS</span></div>
+          <div class="tools">
+            <button class="tool" id="toolNova" data-tool="nova" type="button"><span class="tool-icon">✧</span><b>星旋爆弹</b><em>×2</em></button>
+            <button class="tool" id="toolAnchor" data-tool="anchor" type="button"><span class="tool-icon">↯</span><b>时空定锚</b><em>×1</em></button>
+            <button class="tool" id="toolKey" data-tool="key" type="button"><span class="tool-icon">⌑</span><b>解锁密钥</b><em>×1</em></button>
+            <button class="tool" id="toolRewind" data-tool="rewind" type="button"><span class="tool-icon">◴</span><b>回溯沙漏</b><em>×3</em></button>
+            <button class="tool" id="toolDouble" data-tool="double" type="button"><span class="tool-icon">✦</span><b>双倍星辉</b><em>×1</em></button>
+          </div>
+
+          <div class="chapter"><div class="chapter-name"><span>◉</span> 第一章 · 初见星河</div><p>穿过静谧的月影带，收集沿途散落的星尘。</p></div>
+        </aside>
+
+        <section class="play-panel" aria-label="游戏画布">
+          <div class="board-head"><div class="level"><span class="level-badge" id="levelBadge">CHAPTER 01</span><h2 id="levelTitle">月影带 · 微光航线</h2></div><span class="hint">剩余时间 <strong id="timeValue">—</strong></span></div>
+          <div class="game-canvas">
+            <div class="orbit-stage" id="orbitStage" aria-label="多层同心星轨游戏区域"></div>
+            <span class="canvas-caption">DRAG ORBIT TO ROTATE</span>
+          </div>
+          <div class="panel-footer"><div class="legend"><i></i> 拖动任意轨道旋转；同一轨道连续 3 颗同色星辰即可星爆</div><div class="footer-actions"><button class="btn ghost" type="button">重置</button><button class="btn primary" type="button">下一关 <span aria-hidden="true">→</span></button></div></div>
+        </section>
+      </div>
+    </div>
+  </main>
+  <script>
+    // 背景星光氛围
+    (() => {
+      const canvas = document.querySelector('#starfield');
+      const ctx = canvas.getContext('2d');
+      let stars = [];
+      const resize = () => { canvas.width = window.innerWidth * devicePixelRatio; canvas.height = window.innerHeight * devicePixelRatio; ctx.setTransform(devicePixelRatio, 0, 0, devicePixelRatio, 0, 0); stars = Array.from({ length: Math.min(150, Math.floor(window.innerWidth / 8)) }, () => ({ x: Math.random() * innerWidth, y: Math.random() * innerHeight, r: Math.random() * 1.3 + .2, a: Math.random() * .65 + .15, s: Math.random() * .004 + .001 })); };
+      const draw = (t) => { ctx.clearRect(0, 0, innerWidth, innerHeight); for (const star of stars) { const alpha = star.a + Math.sin(t * star.s) * .18; ctx.beginPath(); ctx.fillStyle = `rgba(214, 224, 255, ${Math.max(.04, alpha)})`; ctx.arc(star.x, star.y, star.r, 0, Math.PI * 2); ctx.fill(); } requestAnimationFrame(draw); };
+      addEventListener('resize', resize, { passive: true }); resize(); requestAnimationFrame(draw);
+    })();
+
+    // 关卡系统 + 星轨核心玩法
+    (() => {
+      const stage = document.querySelector('#orbitStage');
+      const scoreEl = document.querySelector('#scoreValue');
+      const movesEl = document.querySelector('#movesValue');
+      const levelEl = document.querySelector('#levelValue');
+      const chapterEl = document.querySelector('#chapterValue');
+      const badgeEl = document.querySelector('#levelBadge');
+      const titleEl = document.querySelector('#levelTitle');
+      const timeEl = document.querySelector('#timeValue');
+      const progressEl = document.querySelector('.progress i');
+      const colorNames = ['red', 'blue', 'purple', 'gold', 'cyan', 'green'];
+      const colorCss = { red: 'linear-gradient(145deg,#ff9cae,#bb3f68)', blue: 'linear-gradient(145deg,#9cdbff,#4275d3)', purple: 'linear-gradient(145deg,#c6aeff,#7659d3)', gold: 'linear-gradient(145deg,#ffe8a4,#d58d37)', cyan: 'linear-gradient(145deg,#9ff9ff,#2c9fb8)', green: 'linear-gradient(145deg,#b8f6b1,#35966a)' };
+      const radii = [46, 78, 110, 142, 174, 206];
+      // 关卡数据：前 10 关保留教学配置，后续章节通过 advancedLevel 统一生成。
+      const LEVEL_CONFIGS = [
+        { id: 1, title: '教学 · 初见星河', layers: 2, slots: [4, 4], counts: { red: 4, blue: 4 }, moves: null, time: null, goal: { type: 'loops', value: 2 }, layout: 'tutorial', obstacles: { fixedNebula: [], movingNebula: [], lockedTracks: [] }, specials: { blinking: [], moving: [], splitting: [], blackHoles: [] } },
+        { id: 2, title: '红色回响', layers: 2, slots: [6, 6], counts: { red: 6 }, moves: 8, time: null, goal: { type: 'score', value: 600 }, obstacles: { fixedNebula: [], movingNebula: [], lockedTracks: [] }, specials: { blinking: [], moving: [], splitting: [], blackHoles: [] } },
+        { id: 3, title: '蓝色潮汐', layers: 2, slots: [8, 8], counts: { blue: 8 }, moves: null, time: 25, goal: { type: 'score', value: 700 }, obstacles: { fixedNebula: [], movingNebula: [], lockedTracks: [] }, specials: { blinking: [], moving: [], splitting: [], blackHoles: [] } },
+        { id: 4, title: '双色星流', layers: 2, counts: { red: 8, blue: 8 }, moves: 10, time: null, goal: { type: 'score', value: 800 }, layout: 'mixed', obstacles: { fixedNebula: [], movingNebula: [], lockedTracks: [] }, specials: { blinking: [], moving: [], splitting: [], blackHoles: [] } },
+        { id: 5, title: '双环共鸣', layers: 2, counts: { red: 8, blue: 8 }, moves: 12, time: null, goal: { type: 'loops', value: 4 }, layout: 'dual', obstacles: { fixedNebula: [], movingNebula: [], lockedTracks: [] }, specials: { blinking: [], moving: [], splitting: [], blackHoles: [] } },
+        { id: 6, title: '缺口航线', layers: 2, counts: { red: 6, blue: 6 }, moves: null, time: 35, goal: { type: 'score', value: 900 }, layout: 'gaps', obstacles: { fixedNebula: [], movingNebula: [], lockedTracks: [] }, specials: { blinking: [], moving: [], splitting: [], blackHoles: [] } },
+        { id: 7, title: '紫色新星', layers: 2, counts: { red: 6, blue: 5, purple: 5 }, moves: 13, time: null, goal: { type: 'score', value: 1000 }, layout: 'triple', obstacles: { fixedNebula: [], movingNebula: [], lockedTracks: [] }, specials: { blinking: [], moving: [], splitting: [], blackHoles: [] } },
+        { id: 8, title: '双环跃迁', layers: 2, counts: { red: 8, blue: 8 }, moves: 16, time: null, goal: { type: 'dual', value: 1000 }, layout: 'dual', obstacles: { fixedNebula: [], movingNebula: [], lockedTracks: [] }, specials: { blinking: [], moving: [], splitting: [], blackHoles: [] } },
+        { id: 9, title: '密集星群', layers: 2, counts: { red: 8, blue: 4, purple: 4 }, moves: null, time: 45, goal: { type: 'score', value: 1100 }, layout: 'dense', obstacles: { fixedNebula: [], movingNebula: [], lockedTracks: [] }, specials: { blinking: [], moving: [], splitting: [], blackHoles: [] } },
+        { id: 10, title: '章节奖励 · 星河清屏', layers: 2, counts: { red: 6, blue: 5, purple: 5 }, moves: 18, time: null, goal: { type: 'clear', value: 1 }, layout: 'triple', unlockLayers: 3, obstacles: { fixedNebula: [], movingNebula: [], lockedTracks: [] }, specials: { blinking: [], moving: [], splitting: [], blackHoles: [] } }
+      ];
+      const emptyObstacles = () => ({ fixedNebula: [], movingNebula: [], lockedTracks: [] });
+      const emptySpecials = () => ({ blinking: [], moving: [], splitting: [], blackHoles: [] });
+      const advancedLevel = (id, title, layers, counts, moves, time, goal, options = {}) => ({ id, title, layers, slots: Array(layers).fill(8), counts, moves, time, goal, layout: options.layout || (layers >= 5 ? 'dense' : 'mixed'), obstacles: { ...emptyObstacles(), ...(options.obstacles || {}) }, specials: { ...emptySpecials(), ...(options.specials || {}) }, ...(options.extra || {}) });
+      const ADVANCED_LEVELS = [
+        advancedLevel(11,'星轨进阶 · 三色启航',3,{red:8,blue:8,purple:8},20,null,{type:'score',value:1200}),
+        advancedLevel(12,'星云初现',3,{red:8,blue:8,purple:8},18,null,{type:'score',value:1500},{obstacles:{fixedNebula:[{track:0,slots:[1,5]},{track:1,slots:[3]}]}}),
+        advancedLevel(13,'金色回响',3,{red:7,blue:7,purple:7,gold:5},null,60,{type:'collectColor',color:'gold',value:5},{obstacles:{fixedNebula:[{track:0,slots:[2]},{track:2,slots:[6]}]}}),
+        advancedLevel(14,'星云迷阵',3,{red:8,blue:8,purple:8},22,null,{type:'score',value:1800},{obstacles:{fixedNebula:[{track:0,slots:[0,4]},{track:1,slots:[2]},{track:2,slots:[6]}]}}),
+        advancedLevel(15,'三色共振',3,{red:8,blue:8,purple:8},22,null,{type:'colorLoops',colors:3},{obstacles:{fixedNebula:[{track:0,slots:[1]},{track:1,slots:[3]},{track:2,slots:[5]}]}}),
+        advancedLevel(16,'移动星云带',3,{red:8,blue:8,purple:8},null,70,{type:'score',value:2000},{obstacles:{movingNebula:[{track:0,slots:[1],step:1},{track:2,slots:[5],step:1}]}}),
+        advancedLevel(17,'清屏试炼',3,{red:8,blue:8,purple:8},25,null,{type:'clear',value:1},{obstacles:{fixedNebula:[{track:0,slots:[2]},{track:1,slots:[4]},{track:2,slots:[6]}]}}),
+        advancedLevel(18,'密集星群',3,{red:9,blue:9,purple:9},24,null,{type:'score',value:2200},{layout:'dense',obstacles:{fixedNebula:[{track:0,slots:[1,6]},{track:1,slots:[2]},{track:2,slots:[4]}]}}),
+        advancedLevel(19,'混合星云',3,{red:8,blue:8,purple:8},28,null,{type:'score',value:2400},{obstacles:{fixedNebula:[{track:0,slots:[1,4]}],movingNebula:[{track:2,slots:[3],step:1}]}}),
+        advancedLevel(20,'章节BOSS · 星云王座',3,{red:9,blue:9,purple:9},null,90,{type:'score',value:2800},{obstacles:{fixedNebula:[{track:0,slots:[0,2,4]},{track:1,slots:[1,3,5]},{track:2,slots:[2,6]}],movingNebula:[{track:2,slots:[4],step:1}]},extra:{unlockLayers:4}}),
+        advancedLevel(21,'星河挑战 · 四色起点',4,{red:8,blue:8,purple:8,gold:8},30,null,{type:'score',value:2600}),
+        advancedLevel(22,'锁轨回廊',4,{red:8,blue:8,purple:8,gold:8},28,null,{type:'score',value:3000},{obstacles:{lockedTracks:[2]}}),
+        advancedLevel(23,'紫色星潮',4,{red:7,blue:7,purple:8,gold:7},null,80,{type:'collectColor',color:'purple',value:8},{obstacles:{fixedNebula:[{track:1,slots:[2]},{track:3,slots:[5]}]}}),
+        advancedLevel(24,'锁云交错',4,{red:8,blue:8,purple:8,gold:8},30,null,{type:'score',value:3400},{obstacles:{lockedTracks:[1],fixedNebula:[{track:0,slots:[1,5]},{track:2,slots:[3]}]}}),
+        advancedLevel(25,'四色共鸣',4,{red:8,blue:8,purple:8,gold:8},32,null,{type:'colorLoops',colors:4},{obstacles:{lockedTracks:[3],fixedNebula:[{track:1,slots:[4]}]}}),
+        advancedLevel(26,'双锁星门',4,{red:8,blue:8,purple:8,gold:8},null,90,{type:'score',value:3800},{obstacles:{lockedTracks:[1,3]}}),
+        advancedLevel(27,'锁云清屏',4,{red:8,blue:8,purple:8,gold:8},35,null,{type:'clear',value:1},{obstacles:{lockedTracks:[0,3],fixedNebula:[{track:1,slots:[2]},{track:2,slots:[6]}]}}),
+        advancedLevel(28,'高密度星海',4,{red:10,blue:10,purple:10,gold:10},34,null,{type:'score',value:4200},{layout:'dense',obstacles:{fixedNebula:[{track:0,slots:[1]},{track:2,slots:[3]},{track:3,slots:[6]}]}}),
+        advancedLevel(29,'随机锁轨',4,{red:8,blue:8,purple:8,gold:8},38,null,{type:'score',value:4400},{obstacles:{lockedTracks:[2]}}),
+        advancedLevel(30,'章节BOSS · 四象锁阵',4,{red:9,blue:9,purple:9,gold:9},null,110,{type:'score',value:4800},{obstacles:{lockedTracks:[1,3],fixedNebula:[{track:0,slots:[0,3,6]},{track:1,slots:[2,5]},{track:2,slots:[1,4]},{track:3,slots:[3,6]}]},extra:{unlockBlinking:true}}),
+        advancedLevel(31,'银河专家 · 闪烁序曲',4,{red:8,blue:8,purple:8,gold:8},40,null,{type:'score',value:4600},{obstacles:{fixedNebula:[{track:0,slots:[2]},{track:2,slots:[5]}]} ,specials:{blinking:[{track:0,slots:[1,6]},{track:2,slots:[3]}]}}),
+        advancedLevel(32,'五环星轨',5,{red:8,blue:8,purple:8,gold:8},42,null,{type:'score',value:5000}),
+        advancedLevel(33,'金星密令',5,{red:7,blue:7,purple:7,gold:12},null,100,{type:'collectColor',color:'gold',value:12},{specials:{blinking:[{track:1,slots:[2]},{track:3,slots:[5]}]}}),
+        advancedLevel(34,'闪烁锁云',5,{red:8,blue:8,purple:8,gold:8},44,null,{type:'score',value:5400},{obstacles:{lockedTracks:[2],fixedNebula:[{track:0,slots:[4]}]},specials:{blinking:[{track:0,slots:[1]},{track:2,slots:[3]},{track:4,slots:[6]}]}}),
+        advancedLevel(35,'五环共鸣',5,{red:8,blue:8,purple:8,gold:8},45,null,{type:'loops',value:5},{specials:{blinking:[{track:0,slots:[1]},{track:1,slots:[2]},{track:2,slots:[3]},{track:3,slots:[4]}]}}),
+        advancedLevel(36,'全屏闪烁',5,{red:9,blue:9,purple:9,gold:9},null,110,{type:'score',value:5800},{specials:{blinking:[{track:0,slots:[1,5]},{track:1,slots:[2,6]},{track:2,slots:[3,7]},{track:3,slots:[0,4]},{track:4,slots:[1,5]}]}}),
+        advancedLevel(37,'闪烁清屏',5,{red:8,blue:8,purple:8,gold:8},48,null,{type:'clear',value:1},{obstacles:{lockedTracks:[3]},specials:{blinking:[{track:0,slots:[1]},{track:2,slots:[4]},{track:4,slots:[6]}]}}),
+        advancedLevel(38,'银河混合障碍',5,{red:8,blue:8,purple:8,gold:8},48,null,{type:'score',value:6200},{obstacles:{lockedTracks:[1],fixedNebula:[{track:0,slots:[2]},{track:3,slots:[5]}]},specials:{blinking:[{track:0,slots:[1]},{track:2,slots:[3]},{track:4,slots:[6]}]}}),
+        advancedLevel(39,'随机闪烁',5,{red:8,blue:8,purple:8,gold:8},50,null,{type:'score',value:6400},{specials:{blinking:[{track:0,slots:[1]},{track:1,slots:[3]},{track:2,slots:[5]},{track:3,slots:[7]}]}}),
+        advancedLevel(40,'章节BOSS · 闪烁王冠',5,{red:9,blue:9,purple:9,gold:9},null,130,{type:'score',value:6800},{obstacles:{lockedTracks:[1,4],fixedNebula:[{track:0,slots:[0,4]},{track:2,slots:[2,6]},{track:4,slots:[3,7]}]},specials:{blinking:[{track:0,slots:[1]},{track:1,slots:[3]},{track:2,slots:[5]},{track:3,slots:[7]},{track:4,slots:[2]}]},extra:{unlockMoving:true}}),
+        advancedLevel(41,'宇宙王者 · 移动序曲',5,{red:8,blue:8,purple:8,gold:8},52,null,{type:'score',value:6600},{obstacles:{fixedNebula:[{track:1,slots:[2]},{track:4,slots:[6]}]},specials:{moving:[{track:0,slots:[1,5]},{track:3,slots:[3,7]}]}}),
+        advancedLevel(42,'六环星门',6,{red:10,blue:10,purple:10,gold:10},55,null,{type:'score',value:7000}),
+        advancedLevel(43,'彩星收集',6,{red:8,blue:8,purple:8,gold:15},null,120,{type:'collectColor',color:'gold',value:15},{specials:{moving:[{track:1,slots:[2]},{track:4,slots:[5]},{track:5,slots:[7]}]}}),
+        advancedLevel(44,'移动锁云',6,{red:9,blue:9,purple:9,gold:9},56,null,{type:'score',value:7400},{obstacles:{lockedTracks:[2],fixedNebula:[{track:0,slots:[4]}]},specials:{moving:[{track:1,slots:[1]},{track:4,slots:[6]}]}}),
+        advancedLevel(45,'六环共鸣',6,{red:9,blue:9,purple:9,gold:9},58,null,{type:'loops',value:6},{specials:{moving:[{track:0,slots:[1]},{track:1,slots:[2]},{track:2,slots:[3]},{track:3,slots:[4]}]}}),
+        advancedLevel(46,'全屏移动星',6,{red:10,blue:10,purple:10,gold:10},null,130,{type:'score',value:7800},{specials:{moving:[{track:0,slots:[1,5]},{track:1,slots:[2,6]},{track:2,slots:[3,7]},{track:3,slots:[0,4]},{track:4,slots:[1,5]},{track:5,slots:[2,6]}]}}),
+        advancedLevel(47,'移动闪烁清屏',6,{red:9,blue:9,purple:9,gold:9},60,null,{type:'clear',value:1},{specials:{moving:[{track:1,slots:[2]},{track:4,slots:[5]}],blinking:[{track:0,slots:[1]},{track:3,slots:[6]}]}}),
+        advancedLevel(48,'四障碍混合',6,{red:9,blue:9,purple:9,gold:9},62,null,{type:'score',value:8200},{obstacles:{lockedTracks:[2],fixedNebula:[{track:0,slots:[1]},{track:4,slots:[5]}],movingNebula:[{track:3,slots:[2],step:1}]},specials:{moving:[{track:1,slots:[4]}],blinking:[{track:5,slots:[6]}]}}),
+        advancedLevel(49,'随机移动星',6,{red:9,blue:9,purple:9,gold:9},65,null,{type:'score',value:8600},{specials:{moving:[{track:0,slots:[1]},{track:1,slots:[3]},{track:2,slots:[5]},{track:3,slots:[7]},{track:4,slots:[2]},{track:5,slots:[6]}]}}),
+        advancedLevel(50,'章节终章BOSS · 王者星域',6,{red:10,blue:10,purple:10,gold:10},null,150,{type:'score',value:9000},{obstacles:{lockedTracks:[1,4],fixedNebula:[{track:0,slots:[0,3,6]},{track:2,slots:[2,5]},{track:5,slots:[1,4]}],movingNebula:[{track:3,slots:[3],step:1}]},specials:{moving:[{track:0,slots:[1]},{track:2,slots:[4]}],blinking:[{track:1,slots:[2]},{track:4,slots:[6]}],splitting:[{track:5,slots:[7]}]},extra:{unlockHidden:true}}),
+        advancedLevel(51,'白羊座 · 星座秘境',6,{red:10,blue:10,purple:10,gold:10},null,140,{type:'clear',value:1},{obstacles:{fixedNebula:[{track:0,slots:[1,4]},{track:3,slots:[6]}]},specials:{blinking:[{track:1,slots:[2]},{track:4,slots:[5]}],moving:[{track:2,slots:[3]}],splitting:[{track:5,slots:[7]}]}}),
+        advancedLevel(52,'金牛座 · 坚壁',6,{red:10,blue:10,purple:10,gold:10},70,null,{type:'score',value:9000},{obstacles:{lockedTracks:[1,4]},specials:{moving:[{track:0,slots:[1]},{track:3,slots:[5]}],blinking:[{track:2,slots:[3]}],splitting:[{track:5,slots:[7]}]}}),
+        advancedLevel(53,'双子座 · 双环法则',6,{red:10,blue:10,purple:10,gold:10},null,150,{type:'dualStrict',value:2},{obstacles:{fixedNebula:[{track:1,slots:[2]},{track:4,slots:[5]}]},specials:{blinking:[{track:0,slots:[1]},{track:3,slots:[6]}],moving:[{track:2,slots:[3]}],splitting:[{track:5,slots:[7]}]}}),
+        advancedLevel(54,'巨蟹座 · 移动星暴风',6,{red:10,blue:10,purple:10,gold:10},75,null,{type:'score',value:9500},{specials:{moving:[{track:0,slots:[1,5]},{track:1,slots:[2,6]},{track:2,slots:[3,7]},{track:3,slots:[0,4]},{track:4,slots:[1,5]},{track:5,slots:[2,6]}],blinking:[{track:2,slots:[4]}],splitting:[{track:5,slots:[7]}]}}),
+        advancedLevel(55,'狮子座 · 全屏锁云',6,{red:10,blue:10,purple:10,gold:10},72,null,{type:'score',value:10000},{obstacles:{lockedTracks:[1,4],fixedNebula:[{track:0,slots:[0,3,6]},{track:2,slots:[1,4,7]},{track:5,slots:[2,5]}]},specials:{blinking:[{track:3,slots:[4]}],moving:[{track:2,slots:[6]}],splitting:[{track:5,slots:[7]}]}}),
+        advancedLevel(56,'处女座 · 精准闭环',6,{red:10,blue:10,purple:10,gold:10},null,160,{type:'score',value:10500},{specials:{blinking:[{track:0,slots:[1]},{track:2,slots:[3]},{track:4,slots:[5]}],moving:[{track:1,slots:[2]},{track:3,slots:[4]},{track:5,slots:[6]}],splitting:[{track:5,slots:[7]}]}}),
+        advancedLevel(57,'天秤座 · 平衡法则',6,{red:10,blue:10,purple:10,gold:10},80,null,{type:'balanced',value:1},{obstacles:{lockedTracks:[2],fixedNebula:[{track:0,slots:[1,4]},{track:5,slots:[3,6]}]},specials:{moving:[{track:1,slots:[2]}],blinking:[{track:4,slots:[5]}],splitting:[{track:3,slots:[7]}]}}),
+        advancedLevel(58,'天蝎座 · 黑洞边界',6,{red:10,blue:10,purple:10,gold:10},null,170,{type:'score',value:11000},{obstacles:{fixedNebula:[{track:1,slots:[2]},{track:4,slots:[5]}]},specials:{blackHoles:[{track:0,slots:[0]},{track:3,slots:[4]},{track:5,slots:[7]}],blinking:[{track:2,slots:[3]}],moving:[{track:1,slots:[6]}],splitting:[{track:4,slots:[2]}]}}),
+        advancedLevel(59,'射手座 · 分裂星群',6,{red:10,blue:10,purple:10,gold:10},78,null,{type:'score',value:12000},{specials:{splitting:[{track:0,slots:[1,5]},{track:1,slots:[2,6]},{track:2,slots:[3,7]},{track:3,slots:[0,4]},{track:4,slots:[1,5]},{track:5,slots:[2,6]}],moving:[{track:3,slots:[4]}],blinking:[{track:4,slots:[7]}]}}),
+        advancedLevel(60,'摩羯座 · 终极试炼',6,{red:10,blue:10,purple:10,gold:10},85,null,{type:'clear',value:1},{obstacles:{lockedTracks:[1,4],fixedNebula:[{track:0,slots:[0,3,6]},{track:2,slots:[1,4,7]},{track:5,slots:[2,5]}],movingNebula:[{track:3,slots:[3],step:1}]},specials:{blackHoles:[{track:1,slots:[6]},{track:4,slots:[1]}],blinking:[{track:0,slots:[1]},{track:2,slots:[3]},{track:5,slots:[7]}],moving:[{track:1,slots:[2]},{track:3,slots:[4]}],splitting:[{track:4,slots:[5]},{track:5,slots:[2]}]},extra:{galaxyEffect:true,noHints:true}})
+      ];
+      LEVEL_CONFIGS.push(...ADVANCED_LEVELS);
+      // 后续关卡可直接启用障碍，例如：
+      // obstacles: { fixedNebula: [{ track: 0, slots: [1, 3] }], movingNebula: [{ track: 1, slots: [2], step: 1 }], lockedTracks: [1] }
+      // 特殊星辰示例：specials: { blinking: [{ track: 0, slots: [1] }], moving: [{ track: 1, slots: [2] }], splitting: [{ track: 0, slots: [3] }], blackHoles: [{ track: 1, slots: [4] }] }
+      window.STAR_RAIL_LEVELS = LEVEL_CONFIGS;
+      const hiddenUnlocked = localStorage.getItem('starRailHiddenUnlocked') === '1';
+      const savedLevel = Number(localStorage.getItem('starRailLevel') || 1);
+      const savedUnlocked = Number(localStorage.getItem('starRailUnlocked') || savedLevel);
+      let currentLevel = Math.min(hiddenUnlocked ? 60 : 50, Math.max(1, savedLevel));
+      let unlocked = Math.min(hiddenUnlocked ? 60 : 50, Math.max(1, savedUnlocked));
+      let score = 0, moves = null, timeLeft = null, timer = null, active = true, drag = null, loops = 0, collected = 0, collectedByColor = {}, completedColors = new Set(), rotationCount = 0, anchorSteps = 0, doubleNext = false, selectedTool = null, pendingNova = false, rewindUsed = 0, combo = 0;
+      const inventory = { nova: 2, anchor: 1, key: 1, rewind: 3, double: 1 };
+      const toolNames = { nova: '星旋爆弹', anchor: '时空定锚', key: '解锁密钥', rewind: '回溯沙漏', double: '双倍星辉' };
+      let lastSnapshot = null;
+      let tracks = [];
+      const config = () => LEVEL_CONFIGS[currentLevel - 1];
+      const randomColor = allowed => allowed[Math.floor(Math.random() * allowed.length)];
+      const palette = cfg => Object.entries(cfg.counts).flatMap(([color, count]) => Array(count).fill(color));
+      // 障碍配置支持：fixedNebula / movingNebula 可写为
+      // [{ track: 0, slots: [1, 3], step: 1 }]，lockedTracks 写轨道索引数组。
+      const obstacleSlots = (value, trackIndex) => {
+        if (!value) return [];
+        if (Array.isArray(value) && value.every(item => Number.isInteger(item))) return trackIndex === 0 ? value.slice() : [];
+        if (Array.isArray(value)) {
+          const entry = value.find(item => item && item.track === trackIndex);
+          if (entry) return Array.isArray(entry.slots) ? entry.slots.slice() : [];
+          return Array.isArray(value[trackIndex]) ? value[trackIndex].slice() : [];
+        }
+        if (typeof value === 'object') return Array.isArray(value[trackIndex]) ? value[trackIndex].slice() : [];
+        return [];
+      };
+      const isLocked = (cfg, trackIndex) => !!cfg.obstacles && Array.isArray(cfg.obstacles.lockedTracks) && cfg.obstacles.lockedTracks.includes(trackIndex);
+      const movingStep = (cfg, trackIndex) => { const value = cfg.obstacles && cfg.obstacles.movingNebula; if (!Array.isArray(value)) return 1; const entry = value.find(item => item && item.track === trackIndex); return Number(entry && entry.step) || 1; };
+      const specialSlots = (value, trackIndex) => obstacleSlots(value, trackIndex);
+      const makeItems = (cfg, index) => {
+        const slots = (cfg.slots || [8, 8])[index] || 8;
+        if (cfg.layout === 'tutorial') return index === 0 ? ['red','red','red','red'] : ['blue','blue','blue','blue'];
+        if (cfg.layout === 'dual') return index === 0 ? Array(slots).fill('red') : Array(slots).fill('blue');
+        const colors = palette(cfg).slice(); const allowed = Object.keys(cfg.counts); const result = [];
+        for (let i = 0; i < slots; i++) result.push(colors.length ? colors.splice(Math.floor(Math.random() * colors.length), 1)[0] || null : null);
+        if (cfg.layout === 'gaps') result.forEach((_, i) => { if (i % 4 === 0) result[i] = null; });
+        if (cfg.layout === 'dense') return result.map(item => item || randomColor(allowed));
+        return result;
+      };
+      const updateOrbitScale = () => { const width = stage.clientWidth || 450; stage.style.setProperty('--orbit-scale', Math.min(1, width / 450).toFixed(3)); };
+      const renderTrack = track => { track.el.style.setProperty('--rotation', `${track.rotation}deg`); track.el.querySelectorAll('.slot').forEach((slot, i) => slot.style.setProperty('--angle', `${(360 / track.items.length) * i}deg`)); };
+      const paintSlot = (track, slot, index) => { slot.innerHTML = ''; slot.className = 'slot'; if (track.blackHoles.has(index)) { slot.classList.add('blackhole-slot'); const hole = document.createElement('span'); hole.className = 'blackhole-core'; slot.append(hole); return; } if (track.nebula.has(index)) { slot.classList.add('nebula-slot'); const nebula = document.createElement('span'); nebula.className = 'nebula-core'; slot.append(nebula); return; } const special = track.specials.get(index); if (special) slot.classList.add(`special-${special}`); const color = track.items[index]; if (color) { const core = document.createElement('span'); core.className = `star-core star-${color}`; core.style.setProperty('--star-color', colorCss[color]); slot.append(core); } };
+      // 根据当前关卡一次性重建轨道，障碍与特殊星辰只由配置决定。
+      const build = () => {
+        stage.innerHTML = ''; tracks = []; const cfg = config(); updateOrbitScale();
+        for (let index = 0; index < cfg.layers; index++) {
+          const items = makeItems(cfg, index); const slots = items.length; const obstacleConfig = cfg.obstacles || {}; const specialConfig = cfg.specials || {}; const fixedNebula = new Set(obstacleSlots(obstacleConfig.fixedNebula, index).filter(slot => slot >= 0 && slot < slots)); const movingNebula = new Set(obstacleSlots(obstacleConfig.movingNebula, index).filter(slot => slot >= 0 && slot < slots)); const nebula = new Set([...fixedNebula, ...movingNebula]); const blackHoles = new Set(specialSlots(specialConfig.blackHoles, index).filter(slot => slot >= 0 && slot < slots)); const blinking = new Set(specialSlots(specialConfig.blinking, index).filter(slot => slot >= 0 && slot < slots)); const movingStars = new Set(specialSlots(specialConfig.moving, index).filter(slot => slot >= 0 && slot < slots)); const splitting = new Set(specialSlots(specialConfig.splitting, index).filter(slot => slot >= 0 && slot < slots)); const specials = new Map([...blinking].map(slot => [slot, 'blinking'])); movingStars.forEach(slot => specials.set(slot, 'moving')); splitting.forEach(slot => specials.set(slot, 'splitting')); nebula.forEach(slot => { items[slot] = null; }); blackHoles.forEach(slot => { items[slot] = null; specials.delete(slot); });
+          const el = document.createElement('div'); el.className = 'track'; const track = { el, items, rotation: index % 2 ? 10 : -5, radius: radii[index], fixedNebula, movingNebula, nebula, blackHoles, specials, movingStars, locked: isLocked(cfg, index), slotsCount: slots }; if (track.locked) el.classList.add('is-locked'); el.style.setProperty('--diameter', `${radii[index] * 2}px`); el.style.setProperty('--label-y', `${radii[index] - 14}px`);
+          items.forEach((color, i) => { const slot = document.createElement('button'); slot.className = 'slot'; slot.type = 'button'; slot.style.setProperty('--radius', `${radii[index]}px`); slot.style.setProperty('--star-size', `${index === 0 ? 21 : 19}px`); paintSlot(track, slot, i); el.append(slot); });
+          const label = document.createElement('span'); label.className = 'orbit-label'; label.textContent = `ORBIT ${index + 1}`; label.style.setProperty('--label-y', `${radii[index] - 13}px`); el.append(label); stage.append(el); tracks.push(track); renderTrack(track);
+        }
+      };
+      addEventListener('resize', updateOrbitScale, { passive: true });
+      const updateTools = () => { document.querySelectorAll('.tool[data-tool]').forEach(button => { const key = button.dataset.tool; button.querySelector('em').textContent = `×${inventory[key]}`; const unavailable = key === 'key' && !tracks.some(track => track.locked); const noRewind = key === 'rewind' && (!lastSnapshot || rewindUsed >= 3); button.disabled = inventory[key] <= 0 || !active || unavailable || noRewind; button.classList.toggle('is-selected', selectedTool === key); }); };
+      const updateUI = () => { const cfg = config(); const chapter = Math.min(6, Math.ceil(currentLevel / 10)); levelEl.textContent = `${String(currentLevel).padStart(2, '0')} / 60`; chapterEl.textContent = currentLevel > 50 ? '隐藏' : String(chapter).padStart(2, '0'); badgeEl.textContent = `CHAPTER ${chapter} · LEVEL ${currentLevel}`; titleEl.textContent = cfg.title; scoreEl.textContent = score.toLocaleString('en-US'); movesEl.textContent = cfg.moves == null ? '—' : moves; timeEl.textContent = cfg.time == null ? '—' : `${String(timeLeft).padStart(2, '0')}s`; progressEl.style.width = `${Math.min(100, (currentLevel / 60) * 100)}%`; updateTools(); };
+      const persist = () => { localStorage.setItem('starRailLevel', currentLevel); localStorage.setItem('starRailUnlocked', unlocked); };
+      const stopTimer = () => { if (timer) clearInterval(timer); timer = null; };
+      const startTimer = () => { stopTimer(); if (config().time == null) return; timer = setInterval(() => { if (!active) return; timeLeft -= 1; updateUI(); if (timeLeft <= 0) fail('时间耗尽'); }, 1000); };
+      const resetLevel = () => { const cfg = config(); score = 0; moves = cfg.moves; timeLeft = cfg.time; loops = 0; collected = 0; collectedByColor = {}; completedColors = new Set(); combo = 0; rotationCount = 0; anchorSteps = 0; doubleNext = false; selectedTool = null; pendingNova = false; rewindUsed = 0; lastSnapshot = null; active = true; build(); updateUI(); startTimer(); };
+      const closeDialog = () => document.querySelector('.dialog-layer')?.remove();
+      const showDialog = (kicker, title, message, actionText = '知道了', action = closeDialog) => { closeDialog(); const layer = document.createElement('div'); layer.className = 'dialog-layer'; layer.innerHTML = `<section class="dialog-card" role="dialog" aria-modal="true"><p class="dialog-kicker"></p><h3></h3><p class="dialog-message"></p><div class="dialog-actions"><button class="btn primary dialog-action" type="button"></button></div></section>`; layer.querySelector('.dialog-kicker').textContent = kicker; layer.querySelector('h3').textContent = title; layer.querySelector('.dialog-message').textContent = message; layer.querySelector('.dialog-action').textContent = actionText; layer.querySelector('.dialog-action').addEventListener('click', action); layer.addEventListener('click', event => { if (event.target === layer) closeDialog(); }); document.body.append(layer); layer.querySelector('.dialog-action').focus(); };
+      const showGalaxyUnlock = () => { const overlay = document.createElement('div'); overlay.className = 'galaxy-overlay'; overlay.innerHTML = '<div class="galaxy-label">银河全屏特效 · 已解锁</div>'; document.body.append(overlay); setTimeout(() => overlay.remove(), 2600); };
+      const fail = reason => { active = false; stopTimer(); updateUI(); showDialog('航行中断', '本关未完成', `第 ${currentLevel} 关\n${reason}\n重新调整轨道，再试一次。`, '重玩本关', () => { closeDialog(); resetLevel(); }); };
+      const win = () => { if (!active) return; active = false; stopTimer(); unlocked = Math.max(unlocked, Math.min(60, currentLevel + 1)); const reward = Object.keys(inventory)[Math.floor(Math.random() * Object.keys(inventory).length)]; inventory[reward] += 1; if (config().unlockLayers) localStorage.setItem('starRailLayers', String(config().unlockLayers)); if (config().unlockBlinking) localStorage.setItem('starRailBlinkingUnlocked', '1'); if (config().unlockMoving) localStorage.setItem('starRailMovingUnlocked', '1'); if (config().unlockHidden) localStorage.setItem('starRailHiddenUnlocked', '1'); if (config().galaxyEffect) { localStorage.setItem('starRailGalaxyEffect', '1'); showGalaxyUnlock(); } persist(); updateUI(); const chapterMessage = currentLevel === 10 ? '第一章完成，已解锁 3 层星轨。' : currentLevel === 20 ? '第二章完成，已解锁 4 层星轨。' : currentLevel === 30 ? '第三章完成，已解锁闪烁星。' : currentLevel === 40 ? '第四章完成，已解锁移动星。' : currentLevel === 50 ? '第五章完成，星座秘境已解锁。' : currentLevel === 60 ? '终极试炼完成，银河全屏永久特效已解锁。' : '本关目标完成。'; const next = currentLevel < unlocked ? () => { closeDialog(); currentLevel += 1; persist(); resetLevel(); } : closeDialog; showDialog('航行完成', `第 ${currentLevel} 关通关`, `${chapterMessage}\n通关奖励：${toolNames[reward]} ×1`, currentLevel < unlocked ? '进入下一关' : '继续查看', next); };
+      const checkWin = () => { const goal = config().goal; if (goal.type === 'score' && score >= goal.value) win(); if (goal.type === 'loops' && loops >= goal.value) win(); if (goal.type === 'colorLoops' && completedColors.size >= goal.colors) win(); if (goal.type === 'dual' && loops >= 2 && score >= goal.value) win(); if (goal.type === 'dualStrict' && loops >= 2) win(); if (goal.type === 'collect' && collected >= goal.value) win(); if (goal.type === 'collectColor' && (collectedByColor[goal.color] || 0) >= goal.value) win(); if (goal.type === 'balanced' && loops >= goal.value) win(); if (goal.type === 'clear' && tracks.every(track => track.items.every(item => !item))) win(); };
+      const refill = (track, splitCount = 0) => { const cfg = config(); const allowed = Object.keys(cfg.counts); track.items = track.items.map((item, i) => (track.nebula.has(i) || track.blackHoles.has(i)) ? null : randomColor(allowed)); if (splitCount > 0) { const open = track.items.map((_, i) => i).filter(i => !track.nebula.has(i) && !track.blackHoles.has(i)); for (let i = 0; i < Math.min(2, open.length); i++) track.items[open[i]] = randomColor(allowed); } track.el.querySelectorAll('.slot').forEach((slot, i) => paintSlot(track, slot, i)); };
+      const moveNebula = track => { if (!track.movingNebula.size || !track.items.length) return; const step = movingStep(config(), tracks.indexOf(track)); const next = new Set(); [...track.movingNebula].forEach(slot => { let candidate = (slot + step) % track.items.length; for (let tries = 0; tries < track.items.length && (track.fixedNebula.has(candidate) || track.blackHoles.has(candidate)); tries++) candidate = (candidate + 1) % track.items.length; next.add(candidate); }); track.movingNebula = next; track.nebula = new Set([...track.fixedNebula, ...next]); track.items = track.items.map((item, i) => (track.nebula.has(i) || track.blackHoles.has(i)) ? null : (item || randomColor(Object.keys(config().counts)))); track.el.querySelectorAll('.slot').forEach((slot, i) => paintSlot(track, slot, i)); };
+      const updateBlinkingStars = () => { const allowed = Object.keys(config().counts); tracks.forEach(track => { track.specials.forEach((type, index) => { if (type === 'blinking' && !track.blackHoles.has(index) && !track.nebula.has(index)) track.items[index] = randomColor(allowed); }); track.el.querySelectorAll('.slot').forEach((slot, i) => paintSlot(track, slot, i)); }); };
+      const moveSpecialStars = track => { if (!track.movingStars.size || !track.items.length) return; const moved = new Set(); const occupied = new Set(); [...track.movingStars].forEach(source => { if (occupied.has(source)) return; let target = (source + 1) % track.items.length; let tries = 0; while (tries < track.items.length && (track.nebula.has(target) || moved.has(target))) { target = (target + 1) % track.items.length; tries++; } if (tries >= track.items.length) return; if (track.blackHoles.has(target)) { track.items[source] = null; track.specials.delete(source); occupied.add(source); return; } const sourceItem = track.items[source]; const targetItem = track.items[target]; const targetSpecial = track.specials.get(target); track.items[source] = targetItem || null; track.items[target] = sourceItem || randomColor(Object.keys(config().counts)); track.specials.delete(source); if (targetSpecial) track.specials.set(source, targetSpecial); track.specials.set(target, 'moving'); moved.add(target); occupied.add(source); }); track.movingStars = moved; track.el.querySelectorAll('.slot').forEach((slot, i) => paintSlot(track, slot, i)); };
+      const restoreSnapshot = data => { if (!data) return; data.forEach((saved, i) => { const track = tracks[i]; if (!track) return; track.rotation = saved.rotation; track.items = saved.items.slice(); track.specials = new Map(saved.specials); track.movingStars = new Set(saved.movingStars); track.movingNebula = new Set(saved.movingNebula); track.nebula = new Set([...track.fixedNebula, ...track.movingNebula]); renderTrack(track); track.el.querySelectorAll('.slot').forEach((slot, index) => paintSlot(track, slot, index)); }); };
+      const useTool = key => { if (!active || inventory[key] <= 0) return; if (key === 'nova') { selectedTool = selectedTool === 'nova' ? null : 'nova'; pendingNova = selectedTool === 'nova'; } else if (key === 'anchor') { inventory.anchor--; anchorSteps = 5; } else if (key === 'key') { const target = tracks.find(track => track.locked); if (!target) return; target.locked = false; target.el.classList.remove('is-locked'); inventory.key--; } else if (key === 'rewind') { if (!lastSnapshot || rewindUsed >= 3) return; restoreSnapshot(lastSnapshot.tracks); moves = lastSnapshot.moves; rotationCount = lastSnapshot.rotationCount; score = lastSnapshot.score; loops = lastSnapshot.loops; collected = lastSnapshot.collected; collectedByColor = { ...lastSnapshot.collectedByColor }; completedColors = new Set(lastSnapshot.completedColors); anchorSteps = lastSnapshot.anchorSteps; doubleNext = lastSnapshot.doubleNext; inventory.rewind--; rewindUsed++; lastSnapshot = null; } else if (key === 'double') { doubleNext = true; inventory.double--; } updateUI(); };
+      document.querySelectorAll('.tool[data-tool]').forEach(button => button.addEventListener('click', () => useTool(button.dataset.tool)));
+      const awardDrop = () => { if (Math.random() >= .3) return null; const key = Object.keys(inventory)[Math.floor(Math.random() * Object.keys(inventory).length)]; inventory[key] += 1; return key; };
+      // 闭环入口：先验证特殊关卡规则，再结算分数、连击、掉落和补星。
+      // 局部消除：同一轨道连续 3 颗及以上同色星辰即可匹配；首尾相连，星云与黑洞会打断。
+      const findLocalMatches = track => {
+        const matches = new Set();
+        const len = track.items.length;
+        if (len < 3) return matches;
+        const blocked = index => track.nebula.has(index) || track.blackHoles.has(index);
+        const firstColor = track.items[0];
+        const allSame = Boolean(firstColor) && track.items.every((item, index) => item === firstColor && !blocked(index));
+        if (allSame) {
+          for (let index = 0; index < len; index += 1) matches.add(index);
+          return matches;
+        }
+        for (let start = 0; start < len; start += 1) {
+          const color = track.items[start];
+          if (!color || blocked(start)) continue;
+          const previous = (start - 1 + len) % len;
+          if (track.items[previous] === color && !blocked(previous)) continue;
+          const run = [];
+          for (let step = 0; step < len; step += 1) {
+            const index = (start + step) % len;
+            if (track.items[index] !== color || blocked(index)) break;
+            run.push(index);
+          }
+          if (run.length >= 3) run.forEach(index => matches.add(index));
+        }
+        return matches;
+      };
+      const checkClosedLoops = () => {
+        const localMatches = tracks.map(track => findLocalMatches(track));
+        const matched = tracks.filter((track, index) => localMatches[index].size >= 3);
+        if (!matched.length) return;
+        const goal = config().goal;
+        if (goal.type === 'dualStrict' && matched.length < 2) return;
+        if (goal.type === 'balanced') {
+          const inner = matched.filter(track => tracks.indexOf(track) < Math.ceil(tracks.length / 2)).length;
+          const outer = matched.length - inner;
+          if (inner !== outer) return;
+        }
+        const count = matched.length;
+        combo += 1;
+        let gained = count === 1 ? 100 : count === 2 ? 250 : 500 + (count - 3) * 100;
+        gained += matched.reduce((sum, track) => {
+          const hit = localMatches[tracks.indexOf(track)];
+          return sum + ([...hit].some(index => track.items[index] === 'gold') ? 150 : 0);
+        }, 0);
+        if (doubleNext) {
+          gained *= 2;
+          doubleNext = false;
+        }
+        score += gained;
+        const dropped = awardDrop();
+        loops += count;
+        matched.forEach(track => {
+          const hit = localMatches[tracks.indexOf(track)];
+          const colors = [...hit].map(index => track.items[index]).filter(Boolean);
+          const sample = colors[0];
+          if (sample) completedColors.add(sample);
+          colors.forEach(color => { collectedByColor[color] = (collectedByColor[color] || 0) + 1; });
+          collected += hit.size;
+          const splitCount = [...hit].filter(index => track.specials.get(index) === 'splitting').length;
+          hit.forEach(index => {
+            track.items[index] = null;
+            if (track.specials.get(index) === 'splitting') track.specials.delete(index);
+            track.movingStars.delete(index);
+          });
+          track.el.classList.add('is-bursting');
+          setTimeout(() => {
+            track.el.classList.remove('is-bursting');
+            refill(track, splitCount);
+            checkWin();
+          }, 530);
+        });
+        const pop = document.createElement('div');
+        pop.className = 'score-pop';
+        pop.textContent = `+${gained}${dropped ? ` · ${toolNames[dropped]}` : ''}`;
+        pop.style.left = '50%';
+        pop.style.top = '46%';
+        stage.append(pop);
+        if (count > 1 || combo > 1) {
+          const comboPop = document.createElement('div');
+          comboPop.className = 'combo-pop';
+          comboPop.textContent = `${count > 1 ? '双环共鸣' : '连击'} · COMBO ${combo}`;
+          stage.append(comboPop);
+          setTimeout(() => comboPop.remove(), 1250);
+        }
+        setTimeout(() => pop.remove(), 1050);
+        updateUI();
+        checkWin();
+      };
+      const snapshot = () => tracks.map(track => ({ rotation: track.rotation, items: track.items.slice(), specials: [...track.specials.entries()], movingStars: [...track.movingStars], movingNebula: [...track.movingNebula] }));
+      const beginDrag = (event, track) => { event.preventDefault(); const rect = stage.getBoundingClientRect(); const cx = rect.left + rect.width / 2; const cy = rect.top + rect.height / 2; drag = { track, cx, cy, startAngle: Math.atan2(event.clientY - cy, event.clientX - cx) * 180 / Math.PI, startRotation: track.rotation, moved: false, raf: 0, pendingAngle: null, pointerId: event.pointerId }; stage.setPointerCapture?.(event.pointerId); track.el.classList.add('is-dragging'); };
+      stage.addEventListener('pointerdown', event => { if (!active || event.target.closest('.orbit-label')) return; const rect = stage.getBoundingClientRect(); const scale = Number(getComputedStyle(stage).getPropertyValue('--orbit-scale')) || 1; const distance = Math.hypot(event.clientX - (rect.left + rect.width / 2), event.clientY - (rect.top + rect.height / 2)) / scale; const candidates = pendingNova ? tracks : tracks.filter(track => !track.locked); if (!candidates.length) return; const track = candidates.reduce((best, candidate) => Math.abs(distance - candidate.radius) < Math.abs(distance - best.radius) ? candidate : best, candidates[0]); if (!track || Math.abs(distance - track.radius) > 30) return; if (pendingNova) { inventory.nova--; pendingNova = false; selectedTool = null; track.el.classList.add('is-bursting'); track.items = track.items.map(() => null); setTimeout(() => { track.el.classList.remove('is-bursting'); refill(track); updateUI(); checkWin(); }, 530); updateUI(); return; } lastSnapshot = { tracks: snapshot(), moves, rotationCount, score, loops, collected, collectedByColor: { ...collectedByColor }, completedColors: [...completedColors], anchorSteps, doubleNext }; beginDrag(event, track); });
+      stage.addEventListener('pointermove', event => { if (!drag) return; drag.pendingAngle = Math.atan2(event.clientY - drag.cy, event.clientX - drag.cx) * 180 / Math.PI; if (drag.raf) return; drag.raf = requestAnimationFrame(() => { if (!drag) return; const delta = drag.pendingAngle - drag.startAngle; if (Math.abs(delta) > 3) drag.moved = true; drag.track.rotation = drag.startRotation + delta; renderTrack(drag.track); drag.raf = 0; }); });
+      const endDrag = () => { if (!drag) return; const current = drag; current.track.el.classList.remove('is-dragging'); drag = null; if (current.moved) { rotationCount += 1; if (config().moves != null) moves = Math.max(0, moves - 1); const anchored = anchorSteps > 0; if (anchored) anchorSteps -= 1; moveNebula(current.track); if (!anchored) tracks.forEach(track => moveSpecialStars(track)); if (rotationCount % 3 === 0 && !anchored) updateBlinkingStars(); updateUI(); checkClosedLoops(); if (config().moves != null && moves <= 0 && active) checkWin(); if (config().moves != null && moves <= 0 && active) fail('步数用尽'); } };
+      stage.addEventListener('pointerup', endDrag); stage.addEventListener('pointercancel', endDrag); stage.addEventListener('pointerleave', event => { if (event.buttons === 0) endDrag(); });
+      document.querySelector('.hero-actions .btn.ghost').addEventListener('click', resetLevel); document.querySelector('.hero-actions .btn.primary').addEventListener('click', () => { active = true; startTimer(); updateUI(); }); document.querySelector('.footer-actions .btn.ghost').addEventListener('click', resetLevel); document.querySelector('.footer-actions .btn.primary').addEventListener('click', () => { if (currentLevel < unlocked) { currentLevel += 1; persist(); resetLevel(); } else showDialog('星图锁定', '下一关尚未解锁', `请先完成第 ${currentLevel} 关。`, '继续挑战', closeDialog); });
+      build(); updateUI(); startTimer();
+    })();
+  
+
+  </script>
+</body>
+</html>
